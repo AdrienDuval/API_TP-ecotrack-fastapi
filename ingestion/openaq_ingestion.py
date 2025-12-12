@@ -22,7 +22,7 @@ from app import models, crud, schemas
 
 # OpenAQ API Configuration
 OPENAQ_API_URL = "https://api.openaq.org/v3"
-OPENAQ_API_KEY = os.getenv("OPENAQ_API_KEY", "ccbf10e08dd048d351db7ff346cd3bc551677269814edb1f1ff1862296226bde")  # Set this in environment
+OPENAQ_API_KEY = os.getenv("OPENAQ_API_KEY")  # Set this in environment variable or .env file
 
 # French cities to monitor
 FRENCH_CITIES = [
@@ -175,11 +175,12 @@ def run_ingestion():
     print("🌍 Starting OpenAQ data ingestion...")
     
     # Check API key
-    if OPENAQ_API_KEY == "YOUR_API_KEY_HERE":
+    if not OPENAQ_API_KEY:
         print("⚠️  WARNING: OpenAQ API key not set!")
         print("   Get your free API key at: https://explore.openaq.org/")
         print("   Set it as environment variable: OPENAQ_API_KEY")
-        print("\n   For now, using mock data mode...\n")
+        print("   Or create a .env file with: OPENAQ_API_KEY=your_key_here")
+        print("\n   Exiting...\n")
         return
     
     db = SessionLocal()

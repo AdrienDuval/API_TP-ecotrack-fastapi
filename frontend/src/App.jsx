@@ -5,7 +5,9 @@ import Register from './pages/Register';
 import DashboardLayout from './layouts/DashboardLayout';
 import Dashboard from './pages/Dashboard';
 import Users from './pages/Users';
-import DataManagement from './pages/DataManagement';
+import Indicators from './pages/Indicators';
+import Zones from './pages/Zones';
+import Map from './pages/Map';
 
 // Protected Route Component
 const ProtectedRoute = ({ children, adminOnly = false }) => {
@@ -36,25 +38,21 @@ function AppRoutes() {
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
 
-      <Route path="/" element={
-        <ProtectedRoute>
-          <DashboardLayout />
-        </ProtectedRoute>
-      }>
-        <Route index element={<Dashboard />} />
-        <Route path="analytics" element={<div className="p-4">Analytics Page (Coming Soon)</div>} />
-        <Route path="map" element={<div className="p-4">Map View (Coming Soon)</div>} />
-        <Route path="users" element={
-          <ProtectedRoute adminOnly>
-            <Users />
+        <Route path="/" element={
+          <ProtectedRoute>
+            <DashboardLayout />
           </ProtectedRoute>
-        } />
-        <Route path="data" element={
-          <ProtectedRoute adminOnly>
-            <DataManagement />
-          </ProtectedRoute>
-        } />
-      </Route>
+        }>
+          <Route index element={<Dashboard />} />
+          <Route path="map" element={<Map />} />
+          <Route path="indicators" element={<Indicators />} />
+          <Route path="zones" element={<Zones />} />
+          <Route path="users" element={
+            <ProtectedRoute adminOnly>
+              <Users />
+            </ProtectedRoute>
+          } />
+        </Route>
     </Routes>
   );
 }
