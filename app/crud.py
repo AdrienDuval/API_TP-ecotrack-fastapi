@@ -52,7 +52,22 @@ def get_zone(db: Session, zone_id: int):
     return db.query(models.Zone).filter(models.Zone.id == zone_id).first()
 
 def get_zones(db: Session, skip: int = 0, limit: int = 100):
-    return db.query(models.Zone).offset(skip).limit(limit).all()
+    query = db.query(models.Zone)
+    
+    # Get total count before pagination
+    total = query.count()
+    
+    # Apply pagination
+    items = query.offset(skip).limit(limit).all()
+    
+    return {
+        "items": items,
+        "total": total,
+        "skip": skip,
+        "limit": limit,
+        "has_next": (skip + limit) < total,
+        "has_prev": skip > 0
+    }
 
 def create_zone(db: Session, zone: schemas.ZoneCreate):
     db_zone = models.Zone(**zone.model_dump())
@@ -120,8 +135,12 @@ def get_indicators(
     type: Optional[str] = None,
     zone_id: Optional[int] = None,
     from_date: Optional[datetime] = None,
-    to_date: Optional[datetime] = None
+    to_date: Optional[datetime] = None,
+    sort_by: Optional[str] = "timestamp",
+    order: Optional[str] = "desc"
 ):
+    from sqlalchemy import desc, asc
+    
     query = db.query(models.Indicator)
     
     if type:
@@ -133,7 +152,29 @@ def get_indicators(
     if to_date:
         query = query.filter(models.Indicator.timestamp <= to_date)
     
-    return query.offset(skip).limit(limit).all()
+    # Sorting
+    if sort_by:
+        sort_column = getattr(models.Indicator, sort_by, None)
+        if sort_column:
+            if order == "desc":
+                query = query.order_by(desc(sort_column))
+            else:
+                query = query.order_by(asc(sort_column))
+    
+    # Get total count before pagination
+    total = query.count()
+    
+    # Apply pagination
+    items = query.offset(skip).limit(limit).all()
+    
+    return {
+        "items": items,
+        "total": total,
+        "skip": skip,
+        "limit": limit,
+        "has_next": (skip + limit) < total,
+        "has_prev": skip > 0
+    }
 
 def create_indicator(db: Session, indicator: schemas.IndicatorCreate):
     db_indicator = models.Indicator(**indicator.model_dump())

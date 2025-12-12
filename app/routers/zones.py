@@ -1,22 +1,34 @@
 from typing import List
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
+from pydantic import BaseModel
 from app import crud, schemas, models
 from app.database import get_db
 from app.auth import get_current_active_user, get_current_admin_user
 
 router = APIRouter()
 
-@router.get("/", response_model=List[schemas.ZoneResponse])
+
+class PaginatedZoneResponse(BaseModel):
+    """Response model for paginated zones"""
+    items: List[schemas.ZoneResponse]
+    total: int
+    skip: int
+    limit: int
+    has_next: bool
+    has_prev: bool
+
+
+@router.get("/", response_model=PaginatedZoneResponse)
 def read_zones(
     skip: int = 0,
     limit: int = 100,
     db: Session = Depends(get_db),
     current_user: models.User = Depends(get_current_active_user)
 ):
-    """List all zones"""
-    zones = crud.get_zones(db, skip=skip, limit=limit)
-    return zones
+    """List all zones with pagination"""
+    result = crud.get_zones(db, skip=skip, limit=limit)
+    return result
 
 @router.get("/{zone_id}", response_model=schemas.ZoneResponse)
 def read_zone(
